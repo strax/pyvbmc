@@ -769,6 +769,19 @@ def _get_training_data(function_logger: FunctionLogger):
 
     t_train = function_logger.fun_eval_time[function_logger.X_flag]
 
+    # Prune nonfinite elements from the result set
+    finite_mask = np.isfinite(y_train.squeeze())
+
+    assert (
+        np.count_nonzero(finite_mask) > 0
+    ), "No finite values in training set"
+
+    x_train = x_train[finite_mask]
+    y_train = y_train[finite_mask]
+    if s2_train is not None:
+        s2_train = s2_train[finite_mask]
+    t_train = t_train[finite_mask]
+
     return x_train, y_train, s2_train, t_train
 
 

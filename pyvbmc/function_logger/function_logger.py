@@ -1,11 +1,14 @@
 from copy import deepcopy
 from textwrap import indent
+from math import isnan
 
 import numpy as np
 
 from pyvbmc.formatting import full_repr
 from pyvbmc.parameter_transformer import ParameterTransformer
 from pyvbmc.timer import Timer
+
+Y_MAX_INIT = np.NINF
 
 
 class FunctionLogger:
@@ -55,7 +58,6 @@ class FunctionLogger:
         self.y_orig = np.full([cache_size, 1], np.nan)
         self.X = np.full([cache_size, self.D], np.nan)
         self.y = np.full([cache_size, 1], np.nan)
-        self.y_max = np.nan
         self.n_evals = np.full([cache_size, 1], 0)
 
         if self.noise_flag:
@@ -64,7 +66,7 @@ class FunctionLogger:
         self.Xn: int = -1  # Last filled entry
         # Use 1D array since this is a boolean mask.
         self.X_flag = np.full((cache_size,), False, dtype=bool)
-        self.y_max = float("-Inf")
+        self.y_max = Y_MAX_INIT
         self.fun_eval_time = np.full([cache_size, 1], np.nan)
         self.total_fun_eval_time = 0
 
@@ -144,16 +146,16 @@ class FunctionLogger:
         if not np.isscalar(f_val_orig) and np.size(f_val_orig) == 1:
             f_val_orig = np.array(f_val_orig).flat[0]
 
-        # Check function value
-        if (
-            not np.isscalar(f_val_orig)
-            or not np.isfinite(f_val_orig)
-            or not np.isreal(f_val_orig)
-        ):
-            error_message = """FunctionLogger:InvalidFuncValue:
-            The returned function value must be a finite real-valued scalar
-            (returned value {})"""
-            raise ValueError(error_message.format(str(f_val_orig)))
+        # # Check function value
+        # if (
+        #     not np.isscalar(f_val_orig)
+        #     or not np.isfinite(f_val_orig)
+        #     or not np.isreal(f_val_orig)
+        # ):
+        #     error_message = """FunctionLogger:InvalidFuncValue:
+        #     The returned function value must be a finite real-valued scalar
+        #     (returned value {})"""
+        #     raise ValueError(error_message.format(str(f_val_orig)))
 
         # Check returned function SD
         if self.noise_flag and (
@@ -245,16 +247,16 @@ class FunctionLogger:
         else:
             f_sd = None
 
-        # Check function value
-        if (
-            not np.isscalar(f_val_orig)
-            or not np.isfinite(f_val_orig)
-            or not np.isreal(f_val_orig)
-        ):
-            error_message = """FunctionLogger:InvalidFuncValue:
-            The returned function value must be a finite real-valued scalar
-            (returned value {})"""
-            raise ValueError(error_message.format(str(f_val_orig)))
+        # # Check function value
+        # if (
+        #     not np.isscalar(f_val_orig)
+        #     or not np.isfinite(f_val_orig)
+        #     or not np.isreal(f_val_orig)
+        # ):
+        #     error_message = """FunctionLogger:InvalidFuncValue:
+        #     The returned function value must be a finite real-valued scalar
+        #     (returned value {})"""
+        #     raise ValueError(error_message.format(str(f_val_orig)))
 
         # Check returned function SD
         if self.noise_flag and (
@@ -367,6 +369,10 @@ class FunctionLogger:
         ValueError
             Raise if there is more than one match for a duplicate entry.
         """
+        # Convert NaN evaluation result to -Inf in order to distinguish between
+        # non-evaluated and evaluated values (NaN is used as a placeholder)
+        if isnan(f_val_orig):
+            f_val_orig = np.NINF
         duplicate_flag = (self.X == x).all(axis=1)
         if np.any(duplicate_flag):
             if np.sum(duplicate_flag) > 1:
@@ -417,7 +423,11 @@ class FunctionLogger:
                 self.S[self.Xn] = f_sd
             self.X_flag[self.Xn] = True
             self.n_evals[self.Xn] += 1
-            self.y_max = np.nanmax(self.y[self.X_flag])
+            y_init = self.y[self.X_flag]
+            self.y_max = np.max(
+                y_init, where=np.isfinite(y_init), initial=Y_MAX_INIT
+            )
+            assert not isnan(self.y_max), "y_max is nan"
             return f_val, self.Xn
 
     def __deepcopy__(self, memo):

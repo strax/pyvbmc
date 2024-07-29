@@ -323,9 +323,9 @@ def active_sample(
 
             # Prepare for importance sampling based acquistion function
             if acq_eval.acq_info.get("importance_sampling"):
-                optim_state[
-                    "active_importance_sampling"
-                ] = active_importance_sampling(vp, gp, acq_eval, options)
+                optim_state["active_importance_sampling"] = (
+                    active_importance_sampling(vp, gp, acq_eval, options)
+                )
 
             # Re-evaluate variance of the log joint if requested
             if acq_eval.acq_info.get("compute_var_log_joint"):
