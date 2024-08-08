@@ -1,6 +1,7 @@
 import copy
 import logging
 import math
+from typing import Optional
 
 import cma
 import gpyreg as gpr
@@ -25,7 +26,7 @@ from .options import Options
 
 
 def active_sample(
-    gp: gpr.GP,
+    gp: Optional[gpr.GP],
     sample_count: int,
     optim_state: dict,
     function_logger: FunctionLogger,
