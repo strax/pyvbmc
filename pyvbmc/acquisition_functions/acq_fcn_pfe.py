@@ -47,7 +47,7 @@ class AcqFcnFailureRobustLog(AcqFcnLog):
             var_tot,
         )
 
-        Xs_orig = function_logger.parameter_transformer(Xs)
+        Xs_orig = function_logger.parameter_transformer.inverse(Xs)
         epf = np.clip(
             [self.estimator.predict(x_orig) for x_orig in Xs_orig], 0, 1
         )
