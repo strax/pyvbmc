@@ -51,7 +51,7 @@ class AcqFcnFailureRobustLog(AcqFcnLog):
         epf = np.clip(
             [self.estimator.predict(x_orig) for x_orig in Xs_orig], 0, 1
         )
-        out = acq + log1p(-epf)
+        out = acq - log1p(-epf)
         if np.any(np.isnan(out)):
             breakpoint()
             raise RuntimeError("Acquisition value is NaN")
