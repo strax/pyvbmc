@@ -581,9 +581,10 @@ def active_sample(
                         and function_logger.n_evals[idx_new] == 1
                     ) and not options["noise_shaping"]
                     if update1:
-                        ynew = np.array([[ynew]])  # (1,1)
-                        gp.update(xnew, ynew, compute_posterior=True)
-                        # gp.t(end+1) = tnew
+                        if np.isfinite(ynew):
+                            ynew = np.array([[ynew]])  # (1,1)
+                            gp.update(xnew, ynew, compute_posterior=True)
+                            # gp.t(end+1) = tnew
                     else:
                         gp = reupdate_gp(function_logger, gp)
                     timer.stop_timer("gp_train")
