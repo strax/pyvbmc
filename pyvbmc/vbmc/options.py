@@ -11,6 +11,7 @@ from textwrap import indent
 import numpy as np
 
 from pyvbmc.acquisition_functions import *
+from pyvbmc.pfe import *
 from pyvbmc.formatting import full_repr
 
 
@@ -67,17 +68,28 @@ class Options(MutableMapping, dict):
 
     def update_defaults(self):
         """Change defaults as needed based on values of other options."""
+        updates = dict()
+
         if self.get("specify_target_noise"):
-            updates = {
-                "max_fun_evals": ceil(self["max_fun_evals"] * 1.5),
-                "tol_stable_count": ceil(self["tol_stable_count"] * 1.5),
-                "active_sample_gp_update": True,
-                "active_sample_vp_update": True,
-                "search_acq_fcn": [AcqFcnVIQR()],
-            }
-            for key, val in updates.items():
-                if key not in self["useroptions"]:
-                    self[key] = val
+            updates.update(
+                {
+                    "max_fun_evals": ceil(self["max_fun_evals"] * 1.5),
+                    "tol_stable_count": ceil(self["tol_stable_count"] * 1.5),
+                    "active_sample_gp_update": True,
+                    "active_sample_vp_update": True,
+                    "search_acq_fcn": [AcqFcnVIQR()],
+                }
+            )
+
+        failure_estimator = self.get("failure_estimator")
+        if failure_estimator is not None:
+            updates.update(
+                {"search_acq_fcn": [AcqFcnFailureRobustLog(failure_estimator)]}
+            )
+
+        for key, val in updates.items():
+            if key not in self["useroptions"]:
+                self[key] = val
 
     @classmethod
     def init_from_existing_options(
@@ -137,7 +149,7 @@ class Options(MutableMapping, dict):
             Parameters used to evaluate the options.
         """
         options_list = _read_config_file(options_path)
-        for (key, value, description) in options_list:
+        for key, value, description in options_list:
             if key not in self.get("useroptions") and key != "useroptions":
                 self[key] = eval(value, globals(), evaluation_parameters)
                 self.descriptions[key] = description
@@ -325,7 +337,7 @@ def _read_config_file(options_path: str):
     option_list = []
     description = ""
     for section in conf.sections():
-        for (key, value) in conf.items(section):
+        for key, value in conf.items(section):
             if "#" in key:
                 description = key.strip("# ")
             else:

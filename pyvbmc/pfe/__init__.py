@@ -1,4 +1,8 @@
+import numpy as np
+
 from abc import ABC, abstractmethod
+
+from pyvbmc.function_logger import FunctionLogger
 
 
 class FailureEstimator(ABC):
@@ -6,6 +10,9 @@ class FailureEstimator(ABC):
     def predict(self, x):
         """Predict the probability of failure at x."""
         ...
+
+    def update(self, x, y):
+        """Update the estimator with an observation f(x) = y."""
 
 
 class OracleFailureEstimator(FailureEstimator):
