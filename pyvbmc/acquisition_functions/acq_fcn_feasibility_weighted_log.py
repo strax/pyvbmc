@@ -53,7 +53,4 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
             [self.estimator.predict(x_orig) for x_orig in Xs_orig], 0, 1
         )
         out = acq - np.log(p_feasible)
-        if np.any(np.isnan(out)):
-            breakpoint()
-            raise RuntimeError("Acquisition value is NaN")
         return out
