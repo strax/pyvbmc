@@ -79,7 +79,7 @@ def active_sample(
         logger.setLevel(logging.DEBUG)
 
     parameter_transformer = function_logger.parameter_transformer
-    failure_estimator = options["failure_estimator"]
+    feasibility_estimator = options["feasibility_estimator"]
 
     if gp is None:
         # No GP yet, just use provided points or sample from plausible box.
@@ -493,8 +493,8 @@ def active_sample(
                 optim_state["cache"]["y_orig"] = np.delete(
                     optim_state["cache"]["y_orig"], idx, 0
                 )
-            if failure_estimator is not None:
-                failure_estimator.update(xnew, ynew, function_logger)
+            if feasibility_estimator is not None:
+                feasibility_estimator.update(xnew, ynew, function_logger)
             timer.stop_timer("fun_time")
 
             if hasattr(function_logger, "S"):
@@ -590,8 +590,10 @@ def active_sample(
                             # gp.t(end+1) = tnew
                     else:
                         gp = reupdate_gp(function_logger, gp)
-                    if failure_estimator is not None:
-                        failure_estimator.update(xnew, ynew, function_logger)
+                    if feasibility_estimator is not None:
+                        feasibility_estimator.update(
+                            xnew, ynew, function_logger
+                        )
                     timer.stop_timer("gp_train")
 
             # Check if active search bounds need to be expanded

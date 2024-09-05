@@ -11,7 +11,7 @@ from textwrap import indent
 import numpy as np
 
 from pyvbmc.acquisition_functions import *
-from pyvbmc.pfe import *
+from pyvbmc.feasibility_estimation import *
 from pyvbmc.formatting import full_repr
 
 
@@ -81,12 +81,12 @@ class Options(MutableMapping, dict):
                 }
             )
 
-        failure_estimator = self.get("failure_estimator")
-        if failure_estimator is not None:
+        feasibility_estimator = self.get("feasibility_estimator")
+        if feasibility_estimator is not None:
             updates.update(
                 {
                     "search_acq_fcn": [
-                        AcqFcnFeasibilityWeightedLog(failure_estimator)
+                        AcqFcnFeasibilityWeightedLog(feasibility_estimator)
                     ]
                 }
             )

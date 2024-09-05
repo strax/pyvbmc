@@ -8,26 +8,26 @@ from sklearn.utils.validation import check_is_fitted, NotFittedError
 from pyvbmc.function_logger import FunctionLogger
 
 
-class FailureEstimator(ABC):
+class FeasibilityEstimator(ABC):
     @abstractmethod
     def predict(self, x):
-        """Predict the probability of failure at x."""
+        """Predict the probability of feasibility at x."""
         ...
 
     def update(self, x, y):
         """Update the estimator with an observation f(x) = y."""
 
 
-class OracleFailureEstimator(FailureEstimator):
-    def __init__(self, func):
+class OracleFeasibilityEstimator(FeasibilityEstimator):
+    def __init__(self, prob):
         super().__init__()
-        self.func = func
+        self.prob = prob
 
     def predict(self, x):
-        return self.func(x)
+        return self.prob(x)
 
 
-class GPCFailureEstimator(FailureEstimator):
+class GPCFeasibilityEstimator(FeasibilityEstimator):
     _gpc: GaussianProcessClassifier
 
     def __init__(self):
@@ -66,6 +66,6 @@ class GPCFailureEstimator(FailureEstimator):
             p_feasible = self._gpc.predict_proba(np.atleast_2d(x))[
                 :, 1
             ].squeeze()
-            return 1.0 - p_feasible
+            return p_feasible
         else:
-            return 0.0
+            return 1.0
