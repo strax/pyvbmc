@@ -7,7 +7,6 @@ class FeasibilityEstimator(ABC):
     @abstractmethod
     def predict(self, x):
         """Predict the probability of feasibility at x."""
-        ...
 
     def update(self, x, y):
         """Update the estimator with an observation f(x) = y."""
