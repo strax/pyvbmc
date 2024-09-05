@@ -46,7 +46,7 @@ class GPCFailureEstimator(FailureEstimator):
 
         if function_logger.Xn < 2:
             return
-        mask = np.all(np.isnan(function_logger.X_orig), axis=-1)
+        mask = np.all(~np.isnan(function_logger.y_orig), axis=-1)
         X = function_logger.X_orig[mask]
         y = function_logger.y_orig[mask]
 
