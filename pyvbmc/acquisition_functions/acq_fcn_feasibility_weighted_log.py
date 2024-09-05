@@ -49,10 +49,10 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
         )
 
         Xs_orig = function_logger.parameter_transformer.inverse(Xs)
-        epf = np.clip(
+        p_feasible = np.clip(
             [self.estimator.predict(x_orig) for x_orig in Xs_orig], 0, 1
         )
-        out = acq - log1p(-epf)
+        out = acq - np.log(p_feasible)
         if np.any(np.isnan(out)):
             breakpoint()
             raise RuntimeError("Acquisition value is NaN")
