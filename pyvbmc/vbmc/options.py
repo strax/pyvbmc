@@ -11,7 +11,6 @@ from textwrap import indent
 import numpy as np
 
 from pyvbmc.acquisition_functions import *
-from pyvbmc.feasibility_estimation import *
 from pyvbmc.formatting import full_repr
 
 
