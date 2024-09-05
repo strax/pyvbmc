@@ -2,7 +2,6 @@ import sys
 
 import gpyreg as gpr
 import numpy as np
-from scipy.special import log1p
 
 from pyvbmc.function_logger import FunctionLogger
 from pyvbmc.variational_posterior import VariationalPosterior
