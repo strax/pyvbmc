@@ -10,9 +10,10 @@ from pyvbmc.variational_posterior import VariationalPosterior
 from .acq_fcn_log import AcqFcnLog
 
 
-class AcqFcnFailureRobustLog(AcqFcnLog):
+class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
     """
-    Acquisition function for prospective uncertainty search (log-valued) with failure estimation.
+    Acquisition function for feasibility-weighted prospective uncertainty search
+    (log-valued).
     """
 
     def __init__(self, estimator):

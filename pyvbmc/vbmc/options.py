@@ -84,7 +84,11 @@ class Options(MutableMapping, dict):
         failure_estimator = self.get("failure_estimator")
         if failure_estimator is not None:
             updates.update(
-                {"search_acq_fcn": [AcqFcnFailureRobustLog(failure_estimator)]}
+                {
+                    "search_acq_fcn": [
+                        AcqFcnFeasibilityWeightedLog(failure_estimator)
+                    ]
+                }
             )
 
         for key, val in updates.items():
