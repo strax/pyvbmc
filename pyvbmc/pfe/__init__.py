@@ -66,6 +66,6 @@ class GPCFailureEstimator(FailureEstimator):
             p_feasible = self._gpc.predict_proba(np.atleast_2d(x))[
                 :, 1
             ].squeeze()
-            return 1.0 - np.minimum(p_feasible, 0.5) * 2
+            return 1.0 - p_feasible
         else:
             return 0.0
