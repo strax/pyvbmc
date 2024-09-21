@@ -22,7 +22,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         except NotFittedError:
             return False
 
-    def update(self, x, y, function_logger: FunctionLogger):
+    def update(self, x, y, *, function_logger: FunctionLogger):
         del x, y
 
         if function_logger.Xn < 2:

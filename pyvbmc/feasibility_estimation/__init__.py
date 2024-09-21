@@ -1,6 +1,10 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
-import numpy as np
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pyvbmc.function_logger import FunctionLogger
 
 
 class FeasibilityEstimator(ABC):
@@ -8,7 +12,7 @@ class FeasibilityEstimator(ABC):
     def predict(self, x):
         """Predict the probability of feasibility at x."""
 
-    def update(self, x, y):
+    def update(self, x, y, *, function_logger: FunctionLogger):
         """Update the estimator with an observation f(x) = y."""
 
     def optimize(self):
