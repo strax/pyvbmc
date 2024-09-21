@@ -1131,6 +1131,12 @@ class VBMC:
 
             timer.stop_timer("gp_train")
 
+            # Reoptimize feasibility estimator if enabled
+            if fe := self.options.get("feasibility_estimator"):
+                timer.start_timer("fe_optimize")
+                fe.optimize()
+                timer.stop_timer("fe_optimize")
+
             # Check if reached stable sampling regime
             if (
                 Ns_gp == self.options.get("stable_gp_samples")

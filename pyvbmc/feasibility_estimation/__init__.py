@@ -11,6 +11,9 @@ class FeasibilityEstimator(ABC):
     def update(self, x, y):
         """Update the estimator with an observation f(x) = y."""
 
+    def optimize(self):
+        pass
+
 
 class OracleFeasibilityEstimator(FeasibilityEstimator):
     def __init__(self, prob):
