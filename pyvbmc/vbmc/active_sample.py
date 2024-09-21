@@ -493,9 +493,9 @@ def active_sample(
                 optim_state["cache"]["y_orig"] = np.delete(
                     optim_state["cache"]["y_orig"], idx, 0
                 )
+            timer.stop_timer("fun_time")
             if feasibility_estimator is not None:
                 feasibility_estimator.update(xnew, ynew, function_logger)
-            timer.stop_timer("fun_time")
 
             if hasattr(function_logger, "S"):
                 s2new = function_logger.S[idx_new] ** 2
@@ -590,11 +590,11 @@ def active_sample(
                             # gp.t(end+1) = tnew
                     else:
                         gp = reupdate_gp(function_logger, gp)
+                    timer.stop_timer("gp_train")
                     if feasibility_estimator is not None:
                         feasibility_estimator.update(
                             xnew, ynew, function_logger
                         )
-                    timer.stop_timer("gp_train")
 
             # Check if active search bounds need to be expanded
             delta_search = 0.05 * (
