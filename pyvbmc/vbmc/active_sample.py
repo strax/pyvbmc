@@ -495,7 +495,9 @@ def active_sample(
                 )
             timer.stop_timer("fun_time")
             if fe is not None:
+                timer.start_timer("fe_update")
                 fe.update(xnew, ynew, function_logger=function_logger)
+                timer.stop_timer("fe_update")
 
             if hasattr(function_logger, "S"):
                 s2new = function_logger.S[idx_new] ** 2
@@ -592,7 +594,9 @@ def active_sample(
                         gp = reupdate_gp(function_logger, gp)
                     timer.stop_timer("gp_train")
                     if fe is not None:
+                        timer.start_timer("fe_update")
                         fe.update(xnew, ynew, function_logger=function_logger)
+                        timer.stop_timer("fe_update")
 
             # Check if active search bounds need to be expanded
             delta_search = 0.05 * (
