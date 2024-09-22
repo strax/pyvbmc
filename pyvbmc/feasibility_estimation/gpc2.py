@@ -20,6 +20,7 @@ from torch.optim import LBFGS, Optimizer
 from pyvbmc.function_logger import FunctionLogger
 
 from . import FeasibilityEstimator
+from .utils import get_evaluations
 
 logger = logging.getLogger(__name__)
 
@@ -160,11 +161,9 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         if function_logger.Xn < 2:
             return
 
-        mask = np.all(~np.isnan(function_logger.y_orig), axis=-1)
-        X = torch.from_numpy(function_logger.X_orig[mask]).float()
-        y = torch.from_numpy(
-            np.isfinite(function_logger.y_orig[mask])
-        ).squeeze()
+        X, y = get_evaluations(function_logger)
+        X = torch.from_numpy(X).float()
+        y = torch.from_numpy(y).isfinite().squeeze_()
 
         if self.y is not None and torch.numel(y) == torch.numel(self.y):
             logger.debug(
