@@ -140,7 +140,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
             return np.broadcast_to(1.0, batch_dims).squeeze()
 
         x = _as_tensor(np.atleast_2d(x)).double()
-        with gpytorch.settings.fast_computations():
+        with gpytorch.settings.fast_computations(False, False, False):
             predictive = self.model(x)
             # Approximate eq. 8, either with a known good approximation or MC
             if self.use_fast_integrator:
