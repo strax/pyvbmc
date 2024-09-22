@@ -5,6 +5,7 @@ import numpy as np
 
 from pyvbmc.function_logger import FunctionLogger
 from pyvbmc.variational_posterior import VariationalPosterior
+from pyvbmc.timer import main_timer as timer
 
 from .acq_fcn_log import AcqFcnLog
 
@@ -48,6 +49,8 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
         )
 
         Xs_orig = function_logger.parameter_transformer.inverse(Xs)
+        timer.start_timer("fe_predict")
         p_feasible = np.clip(self.estimator.predict(Xs_orig), 0.0, 1.0)
+        timer.stop_timer("fe_predict")
         out = acq - np.log(p_feasible)
         return out
