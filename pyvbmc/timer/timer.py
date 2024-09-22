@@ -81,6 +81,12 @@ class Timer:
         self._durations = {}
         self._start_times = {}
 
+    def to_dict(self) -> dict[str, float]:
+        """
+        Return the current timings as a dictionary.
+        """
+        return self._durations
+
     def __repr__(self, arr_size_thresh=10, expand=True):
         """Construct a detailed string summary.
 
