@@ -44,18 +44,16 @@ def _optimize(
     return objective, i + 1
 
 
-def _convert_to_tensor(
-    input: Tensor | NDArray, *, dtype=torch.float
-) -> Tensor:
-    if not isinstance(input, Tensor):
-        input = torch.from_numpy(input)
-    return input.to(dtype)
+def _as_tensor(x: Tensor | NDArray) -> Tensor:
+    if not isinstance(x, Tensor):
+        x = torch.from_numpy(x)
+    return x
 
 
 class BinaryDirichletGPC(ExactGP):
     def __init__(self, X: Tensor, y: Tensor):
         y = y.to(torch.int)
-        likelihood = DirichletClassificationLikelihood(y)
+        likelihood = DirichletClassificationLikelihood(y, dtype=torch.double)
         assert likelihood.num_classes == 2
         super().__init__(X, likelihood.transformed_targets, likelihood)
         self.likelihood = likelihood
@@ -73,7 +71,9 @@ class BinaryDirichletGPC(ExactGP):
     def set_train_data(self, inputs: Tensor, targets: Tensor):
         X, y = inputs, targets.to(torch.int)
 
-        self.likelihood = DirichletClassificationLikelihood(y)
+        self.likelihood = DirichletClassificationLikelihood(
+            y, dtype=torch.double
+        )
         super().set_train_data(
             X, self.likelihood.transformed_targets, strict=False
         )
@@ -139,7 +139,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
             *batch_dims, _ = np.shape(np.atleast_2d(x))
             return np.broadcast_to(1.0, batch_dims).squeeze()
 
-        x = _convert_to_tensor(np.atleast_2d(x))
+        x = _as_tensor(np.atleast_2d(x)).double()
         with gpytorch.settings.fast_computations():
             predictive = self.model(x)
             # Approximate eq. 8, either with a known good approximation or MC
@@ -162,7 +162,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
             return
 
         X, y = get_evaluations(function_logger)
-        X = torch.from_numpy(X).float()
+        X = torch.from_numpy(X).double()
         y = torch.from_numpy(y).isfinite().squeeze_()
 
         if self.y is not None and torch.numel(y) == torch.numel(self.y):
