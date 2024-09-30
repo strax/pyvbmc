@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from time import time
+import time
 from typing import Callable
 
 import gpytorch
@@ -16,6 +16,7 @@ from gpytorch.models import ExactGP
 from numpy.typing import NDArray
 from torch import Tensor
 from torch.optim import LBFGS, Optimizer
+from torchmin import Minimizer
 
 from pyvbmc.function_logger import FunctionLogger
 
@@ -23,25 +24,6 @@ from . import FeasibilityEstimator
 from .utils import get_evaluations
 
 logger = logging.getLogger(__name__)
-
-
-def _optimize(
-    step: Callable[[], float],
-    optimizer: Optimizer,
-    *,
-    max_iter=1000,
-    ftol=1e-6,
-) -> tuple[float, int]:
-    prev_objective = torch.inf
-    for i in range(max_iter):
-        objective = optimizer.step(step)
-        if prev_objective - objective < ftol:
-            logger.debug(
-                "Early stopping: %s < %s", prev_objective - objective, ftol
-            )
-            break
-        prev_objective = objective
-    return objective, i + 1
 
 
 def _as_tensor(x: Tensor | NDArray) -> Tensor:
@@ -107,11 +89,11 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         self._optimize_hyperparameters()
         return self.model
 
-    def _optimize_hyperparameters(self, **kwargs):
+    def _optimize_hyperparameters(self):
         assert self.model is not None
         model, likelihood = self.model, self.model.likelihood
 
-        optimizer = LBFGS(model.hyperparameters(), max_iter=1)
+        optimizer = Minimizer(model.hyperparameters(), max_iter=1000, tol=1e-8)
         mll = ExactMarginalLogLikelihood(likelihood, model)
 
         model.train()
@@ -121,18 +103,19 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
             optimizer.zero_grad()
             output = model(*model.train_inputs)
             objective = -mll(output, model.train_targets).sum()
-            objective.backward()
-            return objective.item()
+            return objective
 
-        time_begin = time()
-        loss, iters = _optimize(step, optimizer, **kwargs)
-        time_elapsed = time() - time_begin
+        time_begin = time.monotonic()
+        loss = optimizer.step(step)
+        time_end = time.monotonic()
         logger.debug(
-            "Optimized hyperparameters in %.2fs (%d iterations), MLL: %.4f",
-            time_elapsed,
-            iters,
+            "Optimized hyperparameters in %.4fs, MLL = %.6f",
+            time_end - time_begin,
             loss,
         )
+        assert torch.all(
+            torch.isfinite(loss)
+        ), "Optimization resulted in nonfinite parameters"
 
         model.eval()
         likelihood.eval()
