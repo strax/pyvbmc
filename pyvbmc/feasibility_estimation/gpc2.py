@@ -50,6 +50,10 @@ def _as_tensor(x: Tensor | NDArray) -> Tensor:
     return x
 
 
+def _approx_sigmoid_gaussian_conv(mu: Tensor, sigma2: Tensor) -> Tensor:
+    return torch.sigmoid(mu / torch.sqrt(1 + torch.pi / 8 * sigma2))
+
+
 class BinaryDirichletGPC(ExactGP):
     def __init__(self, X: Tensor, y: Tensor):
         y = y.to(torch.int)
@@ -144,9 +148,9 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
             predictive = self.model(x)
             # Approximate eq. 8, either with a known good approximation or MC
             if self.use_fast_integrator:
-                f = predictive.mean[0] - predictive.mean[1]
-                v = predictive.variance[0] + predictive.variance[1]
-                p_failure = torch.sigmoid(f / torch.sqrt(1 + torch.pi / 8 * v))
+                mu = predictive.mean[0] - predictive.mean[1]
+                sigma2 = predictive.variance[0] + predictive.variance[1]
+                p_failure = _approx_sigmoid_gaussian_conv(mu, sigma2)
             else:
                 p_failure, _ = (
                     predictive.sample(torch.Size((256,))).softmax(1).mean(0)
