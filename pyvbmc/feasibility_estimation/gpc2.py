@@ -58,11 +58,11 @@ class BinaryDirichletGPC(ExactGP):
         super().__init__(X, likelihood.transformed_targets, likelihood)
         self.likelihood = likelihood
         batch_shape = torch.Size((2,))
-        self.mean = ConstantMean(batch_shape=batch_shape)
+        self.mean = ConstantMean(batch_shape=batch_shape).double()
         self.cov = ScaleKernel(
-            MaternKernel(5 / 2, batch_shape=batch_shape),
+            MaternKernel(5 / 2, batch_shape=batch_shape).double(),
             batch_shape=batch_shape,
-        )
+        ).double()
 
     def forward(self, x: Tensor):
         mean, cov = self.mean(x), self.cov(x)
