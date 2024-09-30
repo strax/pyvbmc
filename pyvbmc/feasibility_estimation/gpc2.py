@@ -88,13 +88,13 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
     y: Tensor = torch.empty(0)
     model: BinaryDirichletGPC | None = None
     optimize_after_update: bool
-    use_fast_integrator: bool
+    fast_predictive_integration: bool
 
     def __init__(
-        self, *, optimize_after_update=False, use_fast_integrator=True
+        self, *, optimize_after_update=False, fast_predictive_integration=True
     ):
         self.optimize_after_update = optimize_after_update
-        self.use_fast_integrator = use_fast_integrator
+        self.fast_predictive_integration = fast_predictive_integration
 
     def _init_model(self):
         if not (0 < self.y.count_nonzero() < self.y.numel()):
@@ -147,7 +147,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         with gpytorch.settings.fast_computations(False, False, False):
             predictive = self.model(x)
             # Approximate eq. 8, either with a known good approximation or MC
-            if self.use_fast_integrator:
+            if self.fast_predictive_integration:
                 mu = predictive.mean[0] - predictive.mean[1]
                 sigma2 = predictive.variance[0] + predictive.variance[1]
                 p_failure = _approx_sigmoid_gaussian_conv(mu, sigma2)
