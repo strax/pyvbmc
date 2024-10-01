@@ -8,7 +8,7 @@ from pyvbmc.formatting import full_repr
 from pyvbmc.parameter_transformer import ParameterTransformer
 from pyvbmc.timer import Timer
 
-Y_MAX_INIT = np.NINF
+Y_MAX_INIT = -np.inf
 
 
 class FunctionLogger:
@@ -372,7 +372,7 @@ class FunctionLogger:
         # Convert NaN evaluation result to -Inf in order to distinguish between
         # non-evaluated and evaluated values (NaN is used as a placeholder)
         if isnan(f_val_orig):
-            f_val_orig = np.NINF
+            f_val_orig = -np.inf
         duplicate_flag = (self.X == x).all(axis=1)
         if np.any(duplicate_flag):
             if np.sum(duplicate_flag) > 1:
