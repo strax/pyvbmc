@@ -135,7 +135,7 @@ class AbstractAcqFcn(ABC):
             np.any(X_orig < optim_state.get("lb_eps_orig"), axis=1),
             np.any(X_orig > optim_state.get("ub_eps_orig"), axis=1),
         )
-        acq[idx_bounds] = np.inf
+        acq[idx_bounds] = np.Inf
 
         # Re-shape to 1-D, if necessary (to avoid errors in cma.fmin)
         if acq.ndim > 1:

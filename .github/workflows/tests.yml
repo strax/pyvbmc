@@ -17,18 +17,18 @@ jobs:
 
     steps:
       - name: Checkout PyVBMC
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           path: pyvbmc
 
       - name: Checkout GPyReg
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           repository: acerbilab/gpyreg
           path: gpyreg
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
