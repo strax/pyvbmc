@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Callable
 
 import gpytorch
 import numpy as np
@@ -15,7 +14,6 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.models import ExactGP
 from numpy.typing import NDArray
 from torch import Tensor
-from torch.optim import LBFGS, Optimizer
 from torchmin import Minimizer
 
 from pyvbmc.function_logger import FunctionLogger
@@ -120,25 +118,41 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         model.eval()
         likelihood.eval()
 
-    @torch.inference_mode
-    def prob(self, x: NDArray):
+    def _failure_prob(self, x: Tensor):
+        *batch_dims, _ = torch.atleast_2d(x).size()
         if self.model is None:
-            *batch_dims, _ = np.shape(np.atleast_2d(x))
-            return np.broadcast_to(1.0, batch_dims).squeeze()
+            return torch.zeros(batch_dims, dtype=x.dtype)
 
-        x = _as_tensor(np.atleast_2d(x)).double()
+        # Compute posterior predictive distribution
         with gpytorch.settings.fast_computations(False, False, False):
             predictive = self.model(x)
-            # Approximate eq. 8, either with a known good approximation or MC
-            if self.fast_predictive_integration:
-                mu = predictive.mean[0] - predictive.mean[1]
-                sigma2 = predictive.variance[0] + predictive.variance[1]
-                p_failure = _approx_sigmoid_gaussian_conv(mu, sigma2)
-            else:
-                p_failure, _ = (
-                    predictive.sample(torch.Size((256,))).softmax(1).mean(0)
-                )
-            return 1.0 - p_failure.numpy(force=True).squeeze()
+
+        # Approximate eq. 8, either with a known good approximation or MC
+        if self.fast_predictive_integration:
+            mu = predictive.mean[0] - predictive.mean[1]
+            sigma2 = predictive.variance[0] + predictive.variance[1]
+            p_failure = _approx_sigmoid_gaussian_conv(mu, sigma2)
+        else:
+            p_failure, _ = (
+                predictive.sample(torch.Size((256,))).softmax(1).mean(0)
+            )
+        return p_failure
+
+    def _prob(self, x: Tensor) -> Tensor:
+        return 1.0 - self._failure_prob(x)
+
+    def _log_prob(self, x: Tensor) -> Tensor:
+        return torch.log1p_(-self._failure_prob(x))
+
+    @torch.inference_mode
+    def prob(self, x: NDArray):
+        x = _as_tensor(np.atleast_2d(x)).double()
+        return self._prob(x).numpy(force=True).squeeze()
+
+    @torch.inference_mode
+    def log_prob(self, x: NDArray):
+        x = _as_tensor(np.atleast_2d(x)).double()
+        return self._log_prob(x).numpy(force=True).squeeze()
 
     def update(
         self, x: NDArray, y: NDArray, *, function_logger: FunctionLogger
