@@ -1,4 +1,6 @@
-import sys
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import gpyreg as gpr
 import numpy as np
@@ -9,6 +11,9 @@ from pyvbmc.timer import main_timer as timer
 
 from .acq_fcn_log import AcqFcnLog
 
+if TYPE_CHECKING:
+    from pyvbmc.feasibility_estimation import FeasibilityEstimator
+
 
 class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
     """
@@ -16,7 +21,7 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
     (log-valued).
     """
 
-    def __init__(self, estimator):
+    def __init__(self, estimator: FeasibilityEstimator):
         super().__init__()
         self.estimator = estimator
 
