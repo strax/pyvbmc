@@ -16,7 +16,9 @@ class FeasibilityEstimator(ABC):
 
     def log_prob(self, x):
         """Return the estimated log-probability of feasibility at x."""
-        return np.log(self.prob(x))
+        p = self.prob(x)
+        with np.errstate(divide="ignore"):
+            return np.log(p)
 
     def update(self, x, y, *, function_logger: FunctionLogger):
         """Update the estimator with an observation f(x) = y."""
