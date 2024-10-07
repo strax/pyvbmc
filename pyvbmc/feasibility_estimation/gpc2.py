@@ -121,7 +121,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         likelihood.eval()
 
     @torch.inference_mode
-    def predict(self, x: NDArray):
+    def prob(self, x: NDArray):
         if self.model is None:
             *batch_dims, _ = np.shape(np.atleast_2d(x))
             return np.broadcast_to(1.0, batch_dims).squeeze()

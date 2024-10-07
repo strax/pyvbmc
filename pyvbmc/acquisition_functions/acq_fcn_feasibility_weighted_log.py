@@ -49,8 +49,10 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
         )
 
         Xs_orig = function_logger.parameter_transformer.inverse(Xs)
+
         timer.start_timer("fe_predict")
-        p_feasible = np.clip(self.estimator.predict(Xs_orig), 0.0, 1.0)
+        p_feasible = self.estimator.log_prob(Xs_orig)
         timer.stop_timer("fe_predict")
-        out = acq - np.log(p_feasible)
+
+        out = acq - p_feasible
         return out

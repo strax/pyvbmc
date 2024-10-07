@@ -3,14 +3,20 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from pyvbmc.function_logger import FunctionLogger
 
 
 class FeasibilityEstimator(ABC):
     @abstractmethod
-    def predict(self, x):
-        """Predict the probability of feasibility at x."""
+    def prob(self, x):
+        """Return the estimated probability of feasibility at x."""
+
+    def log_prob(self, x):
+        """Return the estimated log-probability of feasibility at x."""
+        return np.log(self.prob(x))
 
     def update(self, x, y, *, function_logger: FunctionLogger):
         """Update the estimator with an observation f(x) = y."""
@@ -22,7 +28,7 @@ class FeasibilityEstimator(ABC):
 class OracleFeasibilityEstimator(FeasibilityEstimator):
     def __init__(self, prob):
         super().__init__()
-        self.prob = prob
+        self._prob = prob
 
-    def predict(self, x):
-        return self.prob(x)
+    def prob(self, x):
+        return self._prob(x)

@@ -42,7 +42,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
             # FIXME: Remove this check
             assert_equal(np.array(self._gpc.classes_), np.array([0, 1]))
 
-    def predict(self, x):
+    def prob(self, x):
         if self._is_fitted:
             p_feasible = self._gpc.predict_proba(np.atleast_2d(x))[
                 :, 1
