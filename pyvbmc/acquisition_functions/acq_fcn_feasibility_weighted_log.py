@@ -21,9 +21,9 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
     (log-valued).
     """
 
-    def __init__(self, estimator: FeasibilityEstimator):
+    def __init__(self, feasibility_estimator: FeasibilityEstimator):
         super().__init__()
-        self.estimator = estimator
+        self.feasibility_estimator = feasibility_estimator
 
     def _compute_acquisition_function(
         self,
@@ -56,7 +56,7 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
         Xs_orig = function_logger.parameter_transformer.inverse(Xs)
 
         timer.start_timer("fe_predict")
-        p_feasible = self.estimator.log_prob(Xs_orig)
+        p_feasible = self.feasibility_estimator.log_prob(Xs_orig)
         timer.stop_timer("fe_predict")
 
         out = acq - p_feasible
