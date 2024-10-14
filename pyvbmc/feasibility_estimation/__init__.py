@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from abc import abstractmethod
+from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 if TYPE_CHECKING:
     from pyvbmc.function_logger import FunctionLogger
 
 
-class FeasibilityEstimator(ABC):
+class FeasibilityEstimator(Protocol):
     @abstractmethod
-    def prob(self, x):
+    def prob(self, x: ArrayLike) -> ArrayLike:
         """Return the estimated probability of feasibility at x."""
+        raise NotImplementedError
 
-    def log_prob(self, x):
+    def log_prob(self, x: ArrayLike) -> ArrayLike:
         """Return the estimated log-probability of feasibility at x."""
         p = self.prob(x)
         with np.errstate(divide="ignore"):
