@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Tuple
+import math
 
 import gpytorch
 import numpy as np
@@ -32,8 +32,11 @@ def _as_tensor(x: Tensor | NDArray) -> Tensor:
     return x
 
 
+_PI_FRAC_8 = math.pi / 8.0
+
+
 def _approx_logit_gaussian_conv(mu: Tensor, sigma2: Tensor) -> Tensor:
-    return mu / torch.sqrt(1 + torch.pi / 8 * sigma2)
+    return mu * torch.rsqrt(1.0 + _PI_FRAC_8 * sigma2)
 
 
 class BinaryDirichletGPC(ExactGP):
