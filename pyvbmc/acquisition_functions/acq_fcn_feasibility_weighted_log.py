@@ -14,6 +14,8 @@ from .acq_fcn_log import AcqFcnLog
 if TYPE_CHECKING:
     from pyvbmc.feasibility_estimation import FeasibilityEstimator
 
+def feasibility_barrier(pf):
+
 
 class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
     """
@@ -59,5 +61,5 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
         p_feasible = self.feasibility_estimator.log_prob(Xs_orig)
         timer.stop_timer("fe_predict")
 
-        out = acq - p_feasible
+        out = acq - np.expm1(-p_feasible)
         return out
