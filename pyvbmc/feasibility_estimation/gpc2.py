@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+from typing import Tuple
 
 import gpytorch
 import numpy as np
@@ -118,15 +119,17 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         model.eval()
         likelihood.eval()
 
-    def _failure_prob(self, x: Tensor):
+    def _posterior_predictive(self, x: Tensor) -> MultivariateNormal:
         *batch_dims, _ = torch.atleast_2d(x).size()
         if self.model is None:
             return torch.zeros(batch_dims, dtype=x.dtype)
 
         # Compute posterior predictive distribution
         with gpytorch.settings.fast_computations(False, False, False):
-            predictive = self.model(x)
+            return self.model(x)
 
+    def _failure_prob(self, x: Tensor):
+        predictive = self._posterior_predictive(x)
         # Approximate eq. 8, either with a known good approximation or MC
         if self.fast_predictive_integration:
             mu = predictive.mean[0] - predictive.mean[1]
