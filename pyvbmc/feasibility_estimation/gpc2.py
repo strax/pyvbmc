@@ -15,6 +15,7 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.models import ExactGP
 from numpy.typing import NDArray
 from torch import Tensor
+from torch.nn.functional import logsigmoid
 from torchmin import Minimizer
 
 from pyvbmc.function_logger import FunctionLogger
@@ -135,7 +136,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         return 1.0 - torch.sigmoid(self._failure_logit(x))
 
     def _log_prob(self, x: Tensor) -> Tensor:
-        return torch.log(torch.sigmoid(-self._failure_logit(x)))
+        return logsigmoid(-self._failure_logit(x))
 
     @torch.inference_mode
     def prob(self, x: NDArray):
