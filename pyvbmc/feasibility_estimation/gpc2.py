@@ -135,7 +135,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         return 1.0 - torch.sigmoid(self._failure_logit(x))
 
     def _log_prob(self, x: Tensor) -> Tensor:
-        return torch.log1p_(-torch.sigmoid(self._failure_logit(x)))
+        return torch.log(torch.sigmoid(-self._failure_logit(x)))
 
     @torch.inference_mode
     def prob(self, x: NDArray):
