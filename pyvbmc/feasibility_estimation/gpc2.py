@@ -124,12 +124,15 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         with gpytorch.settings.fast_computations(False, False, False):
             return self.model(x)
 
-    def _failure_prob(self, x: Tensor):
+    def _failure_logit(self, x: Tensor):
         predictive = self._posterior_predictive(x)
         # Approximate eq. 8 with a known good approximation
         mu = predictive.mean[0] - predictive.mean[1]
         sigma2 = predictive.variance[0] + predictive.variance[1]
-        return torch.sigmoid(_approx_logit_gaussian_conv(mu, sigma2))
+        return _approx_logit_gaussian_conv(mu, sigma2)
+
+    def _failure_prob(self, x: Tensor):
+        return torch.sigmoid(self._failure_logit(x))
 
     def _prob(self, x: Tensor) -> Tensor:
         return 1.0 - self._failure_prob(x)
