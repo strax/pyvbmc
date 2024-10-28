@@ -131,14 +131,11 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         sigma2 = predictive.variance[0] + predictive.variance[1]
         return _approx_logit_gaussian_conv(mu, sigma2)
 
-    def _failure_prob(self, x: Tensor):
-        return torch.sigmoid(self._failure_logit(x))
-
     def _prob(self, x: Tensor) -> Tensor:
-        return 1.0 - self._failure_prob(x)
+        return 1.0 - torch.sigmoid(self._failure_logit(x))
 
     def _log_prob(self, x: Tensor) -> Tensor:
-        return torch.log1p_(-self._failure_prob(x))
+        return torch.log1p_(-torch.sigmoid(self._failure_logit(x)))
 
     @torch.inference_mode
     def prob(self, x: NDArray):
