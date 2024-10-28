@@ -31,8 +31,8 @@ def _as_tensor(x: Tensor | NDArray) -> Tensor:
     return x
 
 
-def _approx_sigmoid_gaussian_conv(mu: Tensor, sigma2: Tensor) -> Tensor:
-    return torch.sigmoid(mu / torch.sqrt(1 + torch.pi / 8 * sigma2))
+def _approx_logit_gaussian_conv(mu: Tensor, sigma2: Tensor) -> Tensor:
+    return mu / torch.sqrt(1 + torch.pi / 8 * sigma2)
 
 
 class BinaryDirichletGPC(ExactGP):
@@ -129,7 +129,7 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         # Approximate eq. 8 with a known good approximation
         mu = predictive.mean[0] - predictive.mean[1]
         sigma2 = predictive.variance[0] + predictive.variance[1]
-        return _approx_sigmoid_gaussian_conv(mu, sigma2)
+        return torch.sigmoid(_approx_logit_gaussian_conv(mu, sigma2))
 
     def _prob(self, x: Tensor) -> Tensor:
         return 1.0 - self._failure_prob(x)
