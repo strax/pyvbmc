@@ -59,5 +59,5 @@ class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
         p_feasible = self.feasibility_estimator.log_prob(Xs_orig)
         timer.stop_timer("fe_predict")
 
-        out = acq - np.expm1(-p_feasible)
+        out = acq + np.expm1(-p_feasible)
         return out
