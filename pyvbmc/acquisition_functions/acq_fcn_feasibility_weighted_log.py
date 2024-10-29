@@ -14,8 +14,6 @@ from .acq_fcn_log import AcqFcnLog
 if TYPE_CHECKING:
     from pyvbmc.feasibility_estimation import FeasibilityEstimator
 
-def feasibility_barrier(pf):
-
 
 class AcqFcnFeasibilityWeightedLog(AcqFcnLog):
     """
