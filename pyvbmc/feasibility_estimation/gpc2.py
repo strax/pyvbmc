@@ -120,15 +120,14 @@ class GPCFeasibilityEstimator(FeasibilityEstimator):
         likelihood.eval()
 
     def _posterior_predictive(self, x: Tensor) -> MultivariateNormal:
-        *batch_dims, _ = torch.atleast_2d(x).size()
-        if self.model is None:
-            return torch.zeros(batch_dims, dtype=x.dtype)
-
         # Compute posterior predictive distribution
         with gpytorch.settings.fast_computations(False, False, False):
             return self.model(x)
 
     def _failure_logit(self, x: Tensor):
+        *batch_dims, _ = torch.atleast_2d(x).size()
+        if self.model is None:
+            return torch.full(batch_dims, -torch.inf, dtype=x.dtype)
         predictive = self._posterior_predictive(x)
         # Approximate eq. 8 with a known good approximation
         mu = predictive.mean[0] - predictive.mean[1]
